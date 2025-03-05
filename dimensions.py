@@ -2,6 +2,8 @@ import polars as pl
 import numpy as np
 from sklearn.ensemble import IsolationForest
 from logger import logger
+from utils import timer, AccuracyConfig
+from enums import OutlierDetectionAlgorithm
 
 
 class BaseMetric:
@@ -25,12 +27,9 @@ class BaseMetric:
 class Validity(BaseMetric):
     # detect nulls, detect inaccurate, estimate expected days,
     # estimate sent values, return score
-    def compute_metric(self):
-        """
-        Computes the validity metric for each records.
-        Given that the timeseries is expected to be cummulative with positive values.
-        Validity will check for periods where the data drops to 0 or the difference between the current and past observations are
-        """
+
+    @timer
+    def compute_validity(self) -> pl.DataFrame:
         validity_df = None
         if self.multiple_devices:
             validity_df = self.df.with_columns(
@@ -59,6 +58,14 @@ class Validity(BaseMetric):
         )
         return validity_df
 
+    def compute_metric(self) -> pl.DataFrame:
+        """
+        Computes the validity metric for each records.
+        Given that the timeseries is expected to be cummulative with positive values.
+        Validity will check for periods where the data drops to 0 or the difference between the current and past observations are
+        """
+        return self.compute_validity()
+
     def compute_score(self):
         # if multiple pass it to validity so it can use group by
         # also pass df and column mapping@
@@ -70,8 +77,54 @@ class Validity(BaseMetric):
 
 
 class Accuracy(BaseMetric):
-    # IQR method
-    def detect_outliers_iqr(data):
+    def __init__(self, df, col_mapping, config=AccuracyConfig, multiple_devices=False):
+        super().__init__(df, col_mapping, multiple_devices)
+        self.config = config
+
+    @timer
+    def median_absolute_deviation(data, threshold=3):
+        median = np.median(data)
+        mad = np.median(np.abs(data - median))
+        modified_z_score = 0.6745 * (data - median) / mad
+        return np.abs(modified_z_score) > threshold
+
+    @timer
+    def isolation_forest(self):
+        df_with_IF_outliers = None
+        logger.info("Instantiating Isolation Forest")
+        # todo - configure IF
+        iso = IsolationForest(random_state=42, contamination="auto")
+
+        if self.multiple_devices:
+            group_results = []
+            for device_id, group in self.df.group_by(self.col_mapping["id"]):
+                logger.info(f"Detecting outliers for Device: **{device_id[0]}**")
+                outliers = iso.fit_predict(
+                    group[self.col_mapping["value"]].to_numpy().reshape(-1, 1)
+                )
+                outliers = np.where(outliers == -1, 1, 0)  # 1 if outlier, 0 if not
+                group_df = group.with_columns(pl.Series("IF_outliers", outliers))
+                group_results.append(group_df)
+            df_with_IF_outliers = pl.concat(group_results)
+
+        else:
+            outliers = iso.fit_predict(
+                self.df[self.col_mapping["value"]].to_numpy().reshape(-1, 1)
+            )
+            outliers = np.where(outliers == -1, 1, 0)  # 1 if outlier, 0 if not
+            df_with_IF_outliers = self.df.with_columns(
+                pl.Series("IF_outliers", outliers)
+            )
+        logger.info(
+            f"Isolation Forest outliers detected successfully. Basic summary: {df_with_IF_outliers['IF_outliers'].value_counts()}"
+        )
+        return df_with_IF_outliers
+
+    @timer
+    def inter_quartile_range(data):
+        """
+        Calculate the inter-quartile range of the input.
+        """
         q1 = np.percentile(data, 25)
         q3 = np.percentile(data, 75)
         iqr = q3 - q1
@@ -79,39 +132,19 @@ class Accuracy(BaseMetric):
         upper_bound = q3 + 1.5 * iqr
         return (data < lower_bound) | (data > upper_bound)
 
-    # MAD method
-    def detect_outliers_mad(data, threshold=3):
-        median = np.median(data)
-        mad = np.median(np.abs(data - median))
-        modified_z_score = 0.6745 * (data - median) / mad
-        return np.abs(modified_z_score) > threshold
-
-    # Isolation Forest method
-    def detect_outliers_isolation_forest(data):
-        iso = IsolationForest(random_state=42, contamination="auto")
-        return iso.fit_predict(data.reshape(-1, 1)) == -1
-
-    def mean_absolute_deviation(y_true, y_pred):
-        """
-        Calculate the mean absolute error of the model.
-        """
-        ...
-
-    def isolation_forest(df):
-        """
-        Detect anomalies in the data using Isolation Forest.
-        """
-        ...
-
-    def inter_quartile_range(x):
-        """
-        Calculate the inter-quartile range of the input.
-        """
-        ...
-
+    @timer
     def ensemble(): ...
 
-    def compute_metric(): ...
+    def compute_metric(self) -> pl.DataFrame:
+        df_with_outliers = None
+        if OutlierDetectionAlgorithm.IF.value in self.config.algorithms:
+            df_with_outliers = self.isolation_forest()
+        if OutlierDetectionAlgorithm.IQR.value in self.config.algorithms:
+            df_with_outliers = self.inter_quartile_range()
+        if OutlierDetectionAlgorithm.MAD.value in self.config.algorithms:
+            df_with_outliers = self.median_absolute_deviation()
+        # if ensemble logical and...
+        return df_with_outliers
 
 
 class Completeness(BaseMetric):
@@ -186,3 +219,7 @@ class Timeliness(BaseMetric):
                 "VALIDITY",
             ]
         )
+
+
+# added checks for ensemble
+# implemented accuracy/isolation forest

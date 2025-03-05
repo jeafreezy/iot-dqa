@@ -1,11 +1,12 @@
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict
 
-from dimensions import Validity
+from dimensions import Accuracy, Validity
+
+from utils import AccuracyConfig, MetricsConfig
 
 from enums import (
     Dimension,
     FrequencyCalculationMethod,
-    Offset,
     OutlierDetectionAlgorithm,
 )
 import polars as pl
@@ -16,46 +17,6 @@ from exceptions import (
     InvalidColumnMappingException,
 )
 from logger import logger
-
-
-@dataclass
-class AcuracyConfig:
-    ensemble: bool = True
-    algorithms: list[OutlierDetectionAlgorithm] = field(
-        default_factory=lambda: [x.value for x in OutlierDetectionAlgorithm]
-    )
-
-    def __post_init__(self):
-        if not all(
-            algo in OutlierDetectionAlgorithm._value2member_map_
-            for algo in self.algorithms
-        ):
-            raise ValueError(
-                f"All algorithms must be valid values of OutlierDetectionAlgorithm. Provided: {self.algorithms}"
-            )
-        if not isinstance(self.ensemble, bool):
-            raise ValueError(
-                f"Ensemble must be valid boolean. Provided: {self.ensemble}"
-            )
-
-
-@dataclass
-class MetricsConfig:
-    accuracy: AcuracyConfig
-    frequency: Offset = None
-    iat_method: FrequencyCalculationMethod = None
-
-    def __post_init__(self):
-        if self.frequency:
-            if self.frequency not in Offset._value2member_map_:
-                raise ValueError(
-                    f"Invalid frequency: {self.frequency}. Must be one of {list(Offset._value2member_map_.keys())}"
-                )
-
-        if not (self.frequency or self.iat_method):
-            raise ValueError(
-                "At least one of 'frequency' or 'iat_method' must be provided."
-            )
 
 
 # completeness is default and no configurable. Look for nulls. Compute IAT and find empty records/missing dates not in the dataset.
@@ -70,7 +31,7 @@ class DataQualityScore:
         metrics_config: MetricsConfig = asdict(
             MetricsConfig(
                 iat_method=FrequencyCalculationMethod.MIN.value,
-                accuracy=AcuracyConfig(),
+                accuracy=AccuracyConfig(),
             )
         ),
         dimensions: list[Dimension] = [x.value for x in Dimension],
@@ -164,9 +125,18 @@ class DataQualityScore:
             self.metrics_config = MetricsConfig(
                 iat_method=self.metrics_config.get("iat_method"),
                 frequency=self.metrics_config.get("frequency"),
-                accuracy=AcuracyConfig(**self.metrics_config.get("accuracy")),
+                accuracy=AccuracyConfig(**self.metrics_config.get("accuracy")),
             )
-
+            if self.metrics_config.accuracy.ensemble:
+                if len(self.metrics_config.accuracy.algorithms) < 2:
+                    raise InvalidDimensionException(
+                        "At least two outlier detection algorithms are required when ensemble is enabled."
+                    )
+            else:
+                if len(self.metrics_config.accuracy.algorithms) != 1:
+                    raise InvalidDimensionException(
+                        "Exactly one outlier detection algorithm is required when ensemble is not enabled."
+                    )
             logger.info("Metrics configuration validation completed without errors...")
             return
         except Exception as e:
@@ -220,16 +190,28 @@ class DataQualityScore:
         else:
             df = df.sort(by=self.col_mapping["date"])
 
+        df_metrics = None
         # based on the selected dimensions, instantiate the classes.
         if Dimension.VALIDITY.value in self.dimensions:
             logger.info("Computing validity metric...")
 
-            df_with_validity_metric = Validity(
+            df_metrics = Validity(
                 df, self.col_mapping, self.multiple_devices
             ).compute_metric()
 
             logger.info("Validity metric completed...")
-            logger.info(f"First few rows: {df_with_validity_metric.head()}")
+            logger.info(f"First few rows: {df_metrics.head()}")
+
+        if Dimension.ACCURACY.value in self.dimensions:
+            logger.info("Computing accuracy metric...")
+            df_metrics = Accuracy(
+                df,
+                self.col_mapping,
+                self.metrics_config.accuracy,
+                self.multiple_devices,
+            ).compute_metric()
+            logger.info("Accuracy metric completed...")
+
         # base metric- compute_metric_many(df)
         # return json of results i.e total_invalid, total_inaccurate, validity_record.
         # compute_metric(df)
@@ -245,9 +227,9 @@ class DataQualityScore:
 # compute score_ensemble(requires_ahp config)
 
 df_with_metrics = DataQualityScore(
-    "data/water_meters.csv",
+    "./Abyei_water_meters.csv",
     multiple_devices=True,
-    dimensions=[Dimension.VALIDITY.value],
+    dimensions=[Dimension.VALIDITY.value, Dimension.ACCURACY.value],
     col_mapping={
         "latitude": "OGI_LAT",
         "longitude": "OGI_LONG",
@@ -262,7 +244,7 @@ df_with_metrics = DataQualityScore(
             "ensemble": False,
             "algorithms": [
                 OutlierDetectionAlgorithm.IF.value,
-                OutlierDetectionAlgorithm.IQR.value,
+                # OutlierDetectionAlgorithm.IQR.value,
             ],
         },
     },

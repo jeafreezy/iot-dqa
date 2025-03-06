@@ -137,7 +137,9 @@ class DataQualityScore:
                     raise InvalidDimensionException(
                         "Exactly one outlier detection algorithm is required when ensemble is not enabled."
                     )
+
             logger.info("Metrics configuration validation completed without errors...")
+
             return
         except Exception as e:
             logger.error(
@@ -212,11 +214,7 @@ class DataQualityScore:
             ).compute_metric()
             logger.info("Accuracy metric completed...")
 
-        # base metric- compute_metric_many(df)
         # return json of results i.e total_invalid, total_inaccurate, validity_record.
-        # compute_metric(df)
-        # generate
-        # log
 
     def __repr__(self):
         print("<DataQualityScore>")
@@ -227,7 +225,7 @@ class DataQualityScore:
 # compute score_ensemble(requires_ahp config)
 
 df_with_metrics = DataQualityScore(
-    "./Abyei_water_meters.csv",
+    "./data/Abyei_water_meters.csv",
     multiple_devices=True,
     dimensions=[Dimension.VALIDITY.value, Dimension.ACCURACY.value],
     col_mapping={
@@ -241,10 +239,11 @@ df_with_metrics = DataQualityScore(
         # default - will use min IAT to compute the expected frequency.
         "frequency": "1d",
         "accuracy": {
-            "ensemble": False,
+            "ensemble": True,
             "algorithms": [
                 OutlierDetectionAlgorithm.IF.value,
-                # OutlierDetectionAlgorithm.IQR.value,
+                OutlierDetectionAlgorithm.IQR.value,
+                OutlierDetectionAlgorithm.MAD.value,
             ],
         },
     },

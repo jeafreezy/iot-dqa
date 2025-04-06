@@ -35,12 +35,12 @@ jobs:
       - name: Install dependencies and generate CLI docs
         run: poetry install --with docs --no-interaction --no-root
 
-      - name: Commit and Push CLI Documentation Changes
+      - name: Commit and Push CDocumentation Changes
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add docs/cli/index.md
-          git commit -m "Update CLI documentation" || echo "No changes to commit"
+          git add docs/index.md
+          git commit -m "Update documentation" || echo "No changes to commit"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

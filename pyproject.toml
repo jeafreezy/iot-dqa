@@ -48,9 +48,10 @@ exclude = [
 ]
 
 [tool.poetry.dependencies]
-# core dependencies
-python = "^3.8.1"
-# optional dependencies
+python = "^3.9.1"
+polars = "^1.26.0"
+optuna = "^4.2.1"
+scikit-learn = "^1.6.1"
 
 
 [tool.poetry.group.dev.dependencies]

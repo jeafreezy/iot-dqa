@@ -35,7 +35,7 @@ jobs:
       - name: Check dist directory
         run: if [ -d "./dist/" ]; then echo "dist directory exists"; else echo "dist directory does not exist"; fi
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           path: ./dist/
 
@@ -43,7 +43,7 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: artifact
           path: dist

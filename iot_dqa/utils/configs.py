@@ -61,7 +61,9 @@ class AccuracyConfig:
     """List of outlier detection algorithms to be used. Default is all values of OutlierDetectionAlgorithm."""
     strategy: AccuracyStrategy = AccuracyStrategy.NONE.value
     """Determine the approach to use for the accuracy computation."""
-    isolation_forest: IsolationForestConfig = IsolationForestConfig()
+    isolation_forest: IsolationForestConfig = field(
+        default_factory=IsolationForestConfig
+    )
     """Configuration for Isolation Forest settings."""
 
     def __post_init__(self):
@@ -133,7 +135,6 @@ class TimelinessConfig:
     """Method to calculate inter-arrival time. Default is 'min'."""
 
     def __post_init__(self):
-
         if not (self.iat_method):
             raise ValueError(
                 "At least one of 'frequency_unit' or 'frequency_unit' or 'iat_method' must be provided."

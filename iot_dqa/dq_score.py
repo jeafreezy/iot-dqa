@@ -1,6 +1,7 @@
 from dataclasses import asdict
 import math
 import os
+from typing import Union
 
 from iot_dqa.dimensions import Accuracy, Completeness, Timeliness, Validity
 
@@ -179,7 +180,7 @@ class DataQualityScore:
             )
 
     def _validate_weighting_mechanism(
-        self, weighting_mechanism: WeightingMechanism | str
+        self, weighting_mechanism: Union[WeightingMechanism, str]
     ) -> WeightingMechanism:
         """Validate the weighting mechanism.
 
@@ -203,7 +204,7 @@ class DataQualityScore:
         return weighting_mechanism
 
     def _validate_output_format(
-        self, output_format: OutputFormat | str
+        self, output_format: Union[OutputFormat, str]
     ) -> OutputFormat:
         """Validate the output format.
 
@@ -301,7 +302,6 @@ class DataQualityScore:
         df_metrics = df
         # based on the selected dimensions, instantiate the classes.
         if Dimension.VALIDITY.value in self.dimensions:
-
             logger.info("Computing validity metric...")
 
             df_metrics = Validity(
@@ -315,7 +315,6 @@ class DataQualityScore:
             logger.info(f"First few rows: {df_metrics.head()}")
 
         if Dimension.ACCURACY.value in self.dimensions:
-
             logger.info("Computing accuracy metric...")
             df_metrics = Accuracy(
                 df_metrics,
@@ -327,7 +326,6 @@ class DataQualityScore:
             logger.info(f"First few rows: {df_metrics.head()}")
 
         if Dimension.COMPLETENESS.value in self.dimensions:
-
             logger.info("Computing completeness metric...")
             df_metrics = Completeness(
                 df_metrics,
@@ -339,7 +337,6 @@ class DataQualityScore:
             logger.info(f"First few rows: {df_metrics.head()}")
 
         if Dimension.TIMELINESS.value in self.dimensions:
-
             logger.info("Computing timeliness metric...")
             df_metrics = Timeliness(
                 df_metrics,
@@ -355,7 +352,7 @@ class DataQualityScore:
     def compute_score(
         self,
         weighting_mechanism: str = WeightingMechanism.EQUAL.value,
-        output_format: str | OutputFormat = OutputFormat.CSV.value,
+        output_format: Union[str, OutputFormat] = OutputFormat.CSV.value,
         output_path: str = "./output",
         ahp_weights: dict[str, float] = None,
         export: bool = True,

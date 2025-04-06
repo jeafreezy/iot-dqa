@@ -25,7 +25,7 @@ class IsolationForestConfig:
 
     n_estimators: int = 100
     max_samples: float = 0.8
-    contamination: float | str = 0.1
+    contamination: Union[float, str] = 0.1
     max_features: int = 1
     random_state: int = 42
 

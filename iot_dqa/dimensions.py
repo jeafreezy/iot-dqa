@@ -34,7 +34,6 @@ class BaseMetric:
 
 
 class Validity(BaseMetric):
-
     @timer
     def compute_validity(self) -> pl.DataFrame:
         """
@@ -94,7 +93,6 @@ class Validity(BaseMetric):
 
 
 class Accuracy(BaseMetric):
-
     @timer
     def median_absolute_deviation(self, df_with_outliers: pl.DataFrame) -> pl.DataFrame:
         """
@@ -436,7 +434,6 @@ class Accuracy(BaseMetric):
 
 
 class Completeness(BaseMetric):
-
     @timer
     def compute_completeness_metrics(self) -> pl.DataFrame:
         """
@@ -459,7 +456,6 @@ class Completeness(BaseMetric):
         elif self.config.completeness_strategy == CompletenessStrategy.ACCURACY.value:
             # if accuracy is not computed, instantiate and compute accuracy here.
             if ColumnName.ACCURACY.value not in completeness_df.columns:
-
                 completeness_df = Accuracy(
                     completeness_df,
                     self.col_mapping,
@@ -500,7 +496,6 @@ class Completeness(BaseMetric):
 
 
 class Timeliness(BaseMetric):
-
     def compute_metric(
         self,
     ) -> pl.DataFrame:

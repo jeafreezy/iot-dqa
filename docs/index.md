@@ -32,7 +32,7 @@ The IoT-DQA library is a Python package designed to streamline Data Quality Asse
 
 ## Installation
 ```bash
-pip install iot_dqa
+pip install iot-dqa
 ```
 
 ## Quick Start

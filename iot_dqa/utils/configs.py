@@ -148,8 +148,8 @@ class TimelinessConfig:
 
 @dataclass
 class MetricsConfig:
-    accuracy: AccuracyConfig = AccuracyConfig()
-    timeliness: TimelinessConfig = TimelinessConfig()
+    accuracy: AccuracyConfig = field(default_factory=AccuracyConfig)
+    timeliness: TimelinessConfig = field(default_factory=TimelinessConfig)
     completeness_strategy: CompletenessStrategy = CompletenessStrategy.ONLY_NULLS.value
 
 

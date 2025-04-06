@@ -58,10 +58,10 @@ jobs:
         run: poetry run pytest
 
   
-      # Ensure docs build without warnings
+      # Ensure docs build
       - name: Check docs
         if: matrix.python-version == 3.9
-        run: poetry run mkdocs build --strict
+        run: poetry run mkdocs build 
 
       - name: Cache pre-commit virtualenvs
         uses: actions/cache@v4

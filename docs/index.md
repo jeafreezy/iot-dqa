@@ -14,7 +14,7 @@ The IoT-DQA library is a Python package designed to streamline Data Quality Asse
 
 ## Key Features
 
-- **Optimized Performance**: Handles large-scale IoT datasets efficiently.
+- **Optimized Performance**: Handles large-scale IoT datasets efficiently, powered by the high-performance Polars library.
 - **Streamlined Validation**: Simplifies the process of validating and analyzing IoT data streams.
 - **Custom Metrics**: Tailor metrics to meet specific requirements.
 - **Comprehensive Scoring**: Generates detailed data quality scores across multiple dimensions.

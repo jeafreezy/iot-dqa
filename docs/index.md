@@ -1,4 +1,4 @@
-# IoT-DQA Library
+# IoT-DQA
 
 The IoT-DQA library is a Python package designed to streamline Data Quality Assessment (DQA) for IoT time-series data. It provides robust tools for validating and analyzing IoT data streams, ensuring reliable data for downstream applications.
 

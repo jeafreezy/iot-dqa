@@ -2,3 +2,7 @@
 ./data 
 data 
 data/ 
+__pycache__/
+.vscode 
+.cache 
+.pytest_cache

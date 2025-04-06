@@ -1,0 +1,85 @@
+site_name: iot-dqa
+repo_name: jeafreezy/iot-dqa
+repo_url: https://github.com/jeafreezy/iot-dqa
+site_description: Fast and efficient data quality assessment for IoT timeseries data.
+site_author: Emmanuel Jolaiya
+site_url: https://jeafreezy.github.io/iot-dqa/
+docs_dir: docs
+
+nav:
+  - IoT DQA: "index.md"
+  - Examples:
+      - examples/usage.md
+      - examples/logging.md
+  - API Reference:
+      - Core:
+          - api/dqa/dimensions.md
+          - api/dqa/dq_score.md
+      - Utils:
+          - api/utils/logger.md
+          - api/utils/enums.md
+          - api/utils/exceptions.md
+          - api/utils/configs.md
+  - Changelog: "changelog.md"
+  - Contributing: "contributing.md"
+  - License: "license.md"
+  - Code of Conduct: "code_of_conduct.md"
+
+watch:
+  - iot_dqa
+  - docs
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      primary: blue
+      accent: orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+  features:
+    - content.code.annotate
+    - content.code.select
+    - content.code.copy
+    - navigation.indexes
+    - navigation.instant
+    - navigation.tracking
+    - search.suggest
+    - search.share
+
+plugins:
+  - search
+  - social
+  - mkdocstrings
+  - termynal
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences

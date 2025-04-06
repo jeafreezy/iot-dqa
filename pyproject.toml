@@ -1,0 +1,74 @@
+[tool.poetry]
+name = "iot-dqa"
+version = "0.0.1"
+description = "Fast and efficient data quality assessment for IoT timeseries data."
+license = "LICENSE"
+authors = ["Emmanuel Jolaiya <jolaiyaemmanuel@gmail.com>"]
+readme = "README.md"
+keywords = ["IoT", "Data Quality", "Data Quality Assessment", "Outlier Detection"]
+classifiers = [
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Intended Audience :: Information Technology",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: GIS",
+]
+
+[tool.poetry.urls]
+"Homepage" = "https://jeafreezy.github.io/iot-dqa/latest/"
+"Repository" = "https://github.com/jeafreezy/iot-dqa"
+"Documentation" = "https://jeafreezy.github.io/iot-dqa/latest/"
+"Bug Tracker" = "https://github.com/jeafreezy/iot-dqa/issues"
+
+
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = 'git'
+style = "semver"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+  ".pytest_cache",
+  ".ruff_cache",
+  ".vscode",
+  "docs/",
+  "__pycache__",
+  ".github",
+  "poetry.lock",
+  ".gitignore",
+  ".pre-commit-config.yaml",
+  "CHANGES.md",
+  "CONTRIBUTING.md",
+]
+
+[tool.poetry.dependencies]
+# core dependencies
+python = "^3.8.1"
+# optional dependencies
+lonboard = { version = "^0.9.3", optional = true }
+geopandas = { version = ">=0.13", optional = true }
+typer = { extras = ["all"], version = "^0.12.4", optional = true }
+
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.5.1"
+pre-commit = "^3.4.0"
+pytest = "^8.3.2"
+mkdocstrings = { extras = ["crystal", "python"], version = "^0.25.2" }
+
+
+[tool.poetry.group.docs.dependencies]
+mkdocs-material = { extras = ["imaging"], version = "^9.5.32" }
+termynal = "^0.12.1"
+mkdocs-typer = "^0.0.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"

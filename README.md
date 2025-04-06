@@ -106,7 +106,7 @@ print("Data Quality Score computed successfully!")
 | **Timeliness**        | `iat_method`              | `min`               | Method to calculate inter-arrival time.                                    |
 | **Completeness**      | `completeness_strategy`   | `ONLY_NULLS`        | Strategy for handling completeness.                                        |
 
-For more details, refer to the [documentation](https://jeafreezy.github.io/iot-dqa/api/utils/configs/).
+For more details on configuration, refer to the [documentation](https://jeafreezy.github.io/iot-dqa/api/utils/configs/).
 
 ## Documentation
 Visit the [documentation](https://jeafreezy.github.io/iot-dqa) for comprehensive details.

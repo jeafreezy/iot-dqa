@@ -28,7 +28,7 @@ import json
 class DataQualityScore:
     def __init__(
         self,
-        file_path: str,
+        file_path: Union[str, None],
         col_mapping: dict[str, str],
         metrics_config: MetricsConfig = asdict(MetricsConfig()),
         dimensions: list[Dimension] = [x.value for x in Dimension],
@@ -165,7 +165,7 @@ class DataQualityScore:
         """
         logger.info("Loading the data from the CSV file...")
         try:
-            df = pl.read_csv(self.file_path)
+            df = pl.read_csv(self.file_path, infer_schema_length=10000)
             logger.info("Data loaded successfully.")
             logger.info(f"Data shape: {df.shape}")
             logger.info(f"Data columns: {df.columns}")

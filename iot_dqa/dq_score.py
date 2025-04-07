@@ -165,7 +165,7 @@ class DataQualityScore:
         """
         logger.info("Loading the data from the CSV file...")
         try:
-            df = pl.read_csv(self.file_path, infer_schema_length=10000)
+            df = pl.read_csv(self.file_path, infer_schema_length=100000)
             logger.info("Data loaded successfully.")
             logger.info(f"Data shape: {df.shape}")
             logger.info(f"Data columns: {df.columns}")

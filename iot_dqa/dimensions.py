@@ -1,3 +1,4 @@
+from dataclasses import asdict
 import polars as pl
 import numpy as np
 from sklearn.ensemble import IsolationForest
@@ -191,7 +192,7 @@ class Accuracy(BaseMetric):
         )
         logger.info("Instantiating Isolation Forest")
 
-        iso = IsolationForest(**self.config.accuracy.isolation_forest)
+        iso = IsolationForest(**asdict(self.config.accuracy.isolation_forest))
 
         if self.multiple_devices:
             group_results = []
